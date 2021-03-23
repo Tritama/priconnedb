@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>クランバトル編成DB</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/send_url.js"></script>
+</head>
+
+<body>
+    <!-- ヘッダーをheader.ejsから読み込む-->
+    <%- include('header'); %>
+
+
+    <div class="search">
+        <form action="/search" method="post">
+            <ul>
+                <li class="form-box">
+                    <select name="itemDate">
+                        <option value="202102"> 2021/02 </option>
+                        <option value="202103"> 2021/03 </option>
+                    </select><br>
+                    
+                    <select name="itemDifficulty">
+                        <option value="1"> 1段階目 </option>
+                        <option value="2"> 2段階目 </option>
+                        <option value="3"> 3段階目 </option>
+                        <option value="4" selected> 4,5段階目 </option>
+                    </select><br>
+                    
+                    <select name="itemAuto">
+                        <option value="0">フルオート</option>
+                        <option value="1">セミオート</option>
+                        <option value="2" selected>手動も含む</option>
+                    </select><br>
+                    <% let contain_boss = Array(Number(prereq.itemBoss_id.length)+1);
+                    contain_boss.fill(0);
+                    for(let i=1;i <= prereq.itemBoss_id.length;i++){contain_boss[prereq.itemBoss_id[i-1]] = 1;}%>
+                    <% for(let i = 1;i <= 5;i++){
+                        %><label for="boss<%=i%>"><input name="itemBoss_id" value="<%=i%>" type="checkbox" id="boss<%=i%>" 
+                            <% if(contain_boss[i]===1){%> checked <%}%> ><%=i%>ボス</label><br>
+                    <%}%> 
+                </li>
+                <!--https://s-cross.net/blog/css-checkbox/-->
+            </ul>
+            <!-- 全てのキャラのうち，itemsの中に入っているキャラidを1，入っていないキャラidを0とする関数を用意-->
+            <% 
+            let contain_chara = Array(chara.length+1);
+            contain_chara.fill(0);
+            for(let i = 0;i < allItems.length;i++){
+                contain_chara[allItems[i].chara1_id]=1;
+                contain_chara[allItems[i].chara2_id]=1;
+                contain_chara[allItems[i].chara3_id]=1;
+                contain_chara[allItems[i].chara4_id]=1;
+                contain_chara[allItems[i].chara5_id]=1;
+            }
+            <!--キャラの限定種類を格納する配列を設定-->
+            let chara_limitedName = Array(chara_limitedType.length);
+                for(let i = 1; i <=chara_limitedType.length;i++){
+                  chara_limitedName[i]=chara_limitedType[i-1].limitedType;}
+            %>
+            <ul>
+                <div class="search-chara-select">
+                    <% for(let i = 1;i <= chara.length;i++){let id= chara[i-1].id;if(contain_chara[id] === 0){continue;}%>
+                    <li>
+                        <label class="check-box" for="check<%=id%>" title="<%=chara[i-1].name%>(<%= chara_limitedName[chara[i-1].limitedType]%>)">
+                            <input type="checkbox" name="charaId" value="<%=id%>" id="check<%=id%>" 
+                            <% if(!prereq.charaId){ %> checked <%}else{
+                                for(j =0;j<prereq.charaId.length;j++){
+                                    if(Number(prereq.charaId[j]) === id){%> checked <%break;}}
+                            }
+                            %> >
+                            <span class="text"></span>
+                            <img src='../images/chara/<%=id%>.png' width="50" height="50">
+                        </label>
+                    </li>
+                    <% } %>
+                </div>
+                    <!-- https://quartet-communications.com/info/topics/7165 -->
+                <!--ここまでループ-->
+            </ul>
+            <div class="search-botton">
+                <input type="submit" formaction="/search/1" value="1凸検索">
+                <input type="submit" formaction="/search/2" value="2凸検索">
+                <input type="submit" formaction="/search/3" value="3凸検索"> 
+                <input type="submit" formaction="/search/0" value="編成検索">
+            </div>
+
+        </form>
+        
+    </div>
+    <div class="container">
+        <div class="index-table-wrapper">
+            <ul class="table-body">
+                <div class="container-header">
+                    <h1>検索結果</h1>
+                    <a href="/new" class="new-button">+ 新規登録</a>
+                </div>
+                <% 
+                if(!items[0]){%><div class="table-dateHeader">検索結果はありません．</div><%}
+                else{
+                    if(prereq !== 0){ %>
+                        <div class="table-dateHeader"><% 
+                            if(items[0].date === 202102){
+                                %> 02/23 05:00~02/27 23:59 <% 
+                            } if(items[0].date === 202103){
+                                %> 03/26 05:00=03/30 23:59 <%}%>
+
+                        <span style="float:right;"><%= (items[0].date - items[0].date % 100) / 100 %>年<%= items[0].date % 100 %>月クランバトル</span> </div> <% 
+                    }
+                } %>
+                <% 
+                let search_chara_list = Array(chara.length+1);search_chara_list.fill(0);
+                prereq.charaId.forEach((c) =>{search_chara_list[c]=1;})
+                %>
+
+<!--検索id=0 通常の検索-->
+                <%
+                if(Number(search_type) === 0){
+                    for(let i = 0;i < items.length;i++){ 
+                        let item = items[i]; 
+                        if(search_chara_list[item.chara1_id]+search_chara_list[item.chara2_id]+search_chara_list[item.chara3_id]
+                        +search_chara_list[item.chara4_id]+search_chara_list[item.chara5_id]<=4){continue;}%>
+                    <!--ここから編成表示画面，itemの編成を表示する-->
+                    <li>
+                        <div class="item-data">
+                            <img class="table-boss-image" src='../images/boss/<%= item.date %>_<%= item.boss %>.png'>
+                            <div class="table-boss-difficulty"><%= item.difficulty %>段階目</div>
+                            <p class="table-boss"><%= item.boss %>ボス</p>
+                            <div class="table-right">
+                                <div class="table-damage"> 
+                                    <span class="table-damage-left">与えたダメージ</span> 
+                                    <span class="table-damage-auto" <% 
+                                    if(item.auto === 0){ %> style="background-color:gray; opacity:0.5">フルオート<% 
+                                    }else if(item.auto === 1){ %> style="background-color:#82c588; opacity:0.7">セミオート<% 
+                                    }else{%> style="background-color:red">手動<% 
+                                    }; %></span>
+                                    
+                                    <span class="table-damage-right"><%= item.damage.toLocaleString()  %><br></span>
+                                </div>
+
+                                <%  const charaId = [item.chara1_id,item.chara2_id,item.chara3_id,item.chara4_id,item.chara5_id];
+                                    const charaRank=[item.chara1_rank,item.chara2_rank,item.chara3_rank,item.chara4_rank,item.chara5_rank];
+                                    const charaStar=[item.chara1_star,item.chara2_star,item.chara3_star,item.chara4_star,item.chara5_star]; %>
+                                <div class="table-chara-list">
+                                    <ul>
+                                        <% 
+                                        for(let i = 0;i < 5;i++){ %>
+                                            <li class="chara-column" title="<%=chara_unsort[charaId[i]-1].name%>(<%= chara_limitedName[chara_unsort[charaId[i]-1].limitedType]%>)">
+                                                <img src='../images/chara/<%= charaId[i] %>.png' width="50" height="50"> 
+                                            <% 
+                                            if( charaRank[i] > 17 ){ %> 
+                                                <div class="table-chara-frame" style="border:3px solid rgb(238, 99, 99);"></div>
+                                                <div class="table-chara-rank" style="color:#ce313b"><% 
+                                            }else{ %>
+                                                <div class="table-chara-frame" style="border:3px solid #d596fa;"></div>
+                                                <div class="table-chara-rank" style="color:#9c45ce"><% 
+                                            } %>
+                                            R<%= charaRank[i] %></div>
+                                            <div class="table-chara-star"><span>★★★</span>
+                                                <% for(let j=3;j < charaStar[i];j++){ if(j === 5){break;} %>★<% } if(charaStar[i] === 6){%><font color=”#f00″>★</font><%}%>
+                                                </div>
+                                        </li><% 
+                                        } %>
+                                    </ul>
+                                </div>
+                                <% 
+                                if(item.carryover > 0){ %>
+                                    <div class="table-chara-carryover">持越<%= item.carryover %>s</div><% 
+                                } %><% 
+                                if(item.URL !== ""){ %>
+                                    <div class="table-chara-url"><a href="<%= item.URL %>" target="_blank">参考リンク</a></div><% 
+                                } %>
+                            </div>
+                        </div>
+                        <div class="item-menu">
+                            <a href="/edit/<%= item.id %>">編集</a>
+                        </div>
+                    </li>
+                    <!--ここまで編成表示画面-->
+                    <% 
+                    }
+                } %>
+<!--検索id=1 1凸編成検索-->
+                <% 
+                if(Number(search_type) === 1){
+                    for(let i = 0;i < items.length;i++){ 
+                        let item = items[i]; 
+                        let check1_counter = search_chara_list[item.chara1_id]+search_chara_list[item.chara2_id]+search_chara_list[item.chara3_id]
+                        +search_chara_list[item.chara4_id]+search_chara_list[item.chara5_id];
+                        if(check1_counter<=3){continue;}%>
+
+                        <div class="attack1">
+                            <div class="attack2-text">
+                                <span>1凸編成(<%=item.boss%>)</span>
+                                <span>サポート使用回数:<%=5-check1_counter%></span>
+                            </div>
+
+                                            <!--ここから編成表示画面，itemの編成を表示する-->
+                    <li>
+                        <div class="item-data">
+                            <img class="table-boss-image" src='../images/boss/<%= item.date %>_<%= item.boss %>.png'>
+                            <div class="table-boss-difficulty"><%= item.difficulty %>段階目</div>
+                            <p class="table-boss"><%= item.boss %>ボス</p>
+                            <div class="table-right">
+                                <div class="table-damage"> 
+                                    <span class="table-damage-left">与えたダメージ</span> 
+                                    <span class="table-damage-auto" <% 
+                                    if(item.auto === 0){ %> style="background-color:gray; opacity:0.5">フルオート<% 
+                                    }else if(item.auto === 1){ %> style="background-color:#82c588; opacity:0.7">セミオート<% 
+                                    }else{%> style="background-color:red">手動<% 
+                                    }; %></span>
+                                    
+                                    <span class="table-damage-right"><%= item.damage.toLocaleString()  %><br></span>
+                                </div>
+
+                                <%  const charaId = [item.chara1_id,item.chara2_id,item.chara3_id,item.chara4_id,item.chara5_id];
+                                    const charaRank=[item.chara1_rank,item.chara2_rank,item.chara3_rank,item.chara4_rank,item.chara5_rank];
+                                    const charaStar=[item.chara1_star,item.chara2_star,item.chara3_star,item.chara4_star,item.chara5_star]; %>
+                                <div class="table-chara-list">
+                                    <ul>
+                                        <% 
+                                        for(let i = 0;i < 5;i++){ %>
+                                            <li class="chara-column" title="<%=chara_unsort[charaId[i]-1].name%>(<%= chara_limitedName[chara_unsort[charaId[i]-1].limitedType]%>)">
+                                                <img src='../images/chara/<%= charaId[i] %>.png' width="50" height="50"> 
+                                            <% 
+                                            if( charaRank[i] > 17 ){ %> 
+                                                <div class="table-chara-frame" style="border:3px solid rgb(238, 99, 99);"></div>
+                                                <div class="table-chara-rank" style="color:#ce313b"><% 
+                                            }else{ %>
+                                                <div class="table-chara-frame" style="border:3px solid #d596fa;"></div>
+                                                <div class="table-chara-rank" style="color:#9c45ce"><% 
+                                            } %>
+                                            R<%= charaRank[i] %></div>
+                                            <div class="table-chara-star"><span>★★★</span>
+                                                <% for(let j=3;j < charaStar[i];j++){ if(j === 5){break;} %>★<% } if(charaStar[i] === 6){%><font color=”#f00″>★</font><%}%>
+                                                </div>
+                                        </li><% 
+                                        } %>
+                                    </ul>
+                                </div>
+                                <% 
+                                if(item.carryover > 0){ %>
+                                    <div class="table-chara-carryover">持越<%= item.carryover %>s</div><% 
+                                } %><% 
+                                if(item.URL !== ""){ %>
+                                    <div class="table-chara-url"><a href="<%= item.URL %>" target="_blank">参考リンク</a></div><% 
+                                } %>
+                            </div>
+                        </div>
+                        <div class="item-menu">
+                            <a href="/edit/<%= item.id %>">編集</a>
+                        </div>
+                    </li>
+                    </div>
+                    <%
+                    }%>
+                    <!--ここまで編成表示画面--><% 
+                } %>
+
+<!--検索id=2 2凸編成検索-->
+                <%
+                if(Number(search_type) === 2){
+                    let formation_number = 0;
+                    for(let i = 0;i < items.length-1;i++){
+                        <!-- check1-1 -->
+                        if(search_chara_list[items[i].chara1_id]+search_chara_list[items[i].chara2_id]+search_chara_list[items[i].chara3_id]
+                        +search_chara_list[items[i].chara4_id]+search_chara_list[items[i].chara5_id]<=3){continue;}
+
+                        for(let j = i+1 ;j < items.length;j++){
+                            <!-- check1-2 -->
+                            if(search_chara_list[items[j].chara1_id]+search_chara_list[items[j].chara2_id]+search_chara_list[items[j].chara3_id]
+                            +search_chara_list[items[j].chara4_id]+search_chara_list[items[j].chara5_id]<=3){continue;}
+                            
+                            <!-- check2 -->
+                            let check2 = search_chara_list.concat();
+                            check2[items[i].chara1_id]--;check2[items[i].chara2_id]--;check2[items[i].chara3_id]--;check2[items[i].chara4_id]--;check2[items[i].chara5_id]--;
+                            check2[items[j].chara1_id]--;check2[items[j].chara2_id]--;check2[items[j].chara3_id]--;check2[items[j].chara4_id]--;check2[items[j].chara5_id]--;
+                            let check2_counter = 0;
+                            for(let k =0;k < check2.length;k++){
+                                if(check2[k]<0){
+                                    check2_counter -=check2[k];
+                                }
+                            }
+                            if(check2_counter >2){continue;}
+                            let id2_items = [items[i],items[j]];
+                            %><div class="attack2">
+                                <div class="attack2-text">
+                                    <span>2凸編成(<%=id2_items[0].boss%>-<%=id2_items[1].boss%>)</span>
+                                    <span>サポート使用回数:<%=check2_counter%></span>
+                                    <span style="float: right">総ダメージ:
+                                        <%const allDamage=id2_items[0].damage + id2_items[1].damage;%>
+                                        <%= allDamage.toLocaleString()%>(平均:<%=(Math.round(allDamage/2)).toLocaleString()%>)</span>
+                                </div>
+                                <%
+                            for(let n = 0;n < 2; n++){
+                                formation_number++;
+                                let item = id2_items[n];%>
+                                            <!--ここから編成表示画面，itemの編成を表示する-->
+                                            <li>
+                                                <div class="item-data">
+                                                    <img class="table-boss-image" src='../images/boss/<%= item.date %>_<%= item.boss %>.png'>
+                                                    <div class="table-boss-difficulty"><%= item.difficulty %>段階目</div>
+                                                    <p class="table-boss"><%= item.boss %>ボス</p>
+                                                    <div class="table-right">
+                                                        <div class="table-damage"> 
+                                                            <span class="table-damage-left">与えたダメージ</span> 
+                                                            <span class="table-damage-auto" <% 
+                                                            if(item.auto === 0){ %> style="background-color:gray; opacity:0.5">フルオート<% 
+                                                            }else if(item.auto === 1){ %> style="background-color:#82c588; opacity:0.7">セミオート<% 
+                                                            }else{%> style="background-color:red">手動<% 
+                                                            }; %></span>
+                                                            
+                                                            <span class="table-damage-right"><%= item.damage.toLocaleString()  %><br></span>
+                                                        </div>
+                        
+                                                        <%  const charaId = [item.chara1_id,item.chara2_id,item.chara3_id,item.chara4_id,item.chara5_id];
+                                                            const charaRank=[item.chara1_rank,item.chara2_rank,item.chara3_rank,item.chara4_rank,item.chara5_rank];
+                                                            const charaStar=[item.chara1_star,item.chara2_star,item.chara3_star,item.chara4_star,item.chara5_star]; %>
+                                                        <div class="table-chara-list">
+                                                            <ul>
+                                                                <% 
+                                                                for(let i = 0;i < 5;i++){ %>
+                                                                    <li class="chara-column" title="<%=chara_unsort[charaId[i]-1].name%>(<%= chara_limitedName[chara_unsort[charaId[i]-1].limitedType]%>)">
+                                                                        <img src='../images/chara/<%= charaId[i] %>.png' width="50" height="50"> 
+                                                                    <% 
+                                                                    if( charaRank[i] > 17 ){ %> 
+                                                                        <div class="table-chara-frame" style="border:3px solid rgb(238, 99, 99);"></div>
+                                                                        <div class="table-chara-rank" style="color:#ce313b"><% 
+                                                                    }else{ %>
+                                                                        <div class="table-chara-frame" style="border:3px solid #d596fa;"></div>
+                                                                        <div class="table-chara-rank" style="color:#9c45ce"><% 
+                                                                    } %>
+                                                                    R<%= charaRank[i] %></div>
+                                                                    <div class="table-chara-star"><span>★★★</span>
+                                                                        <% for(let j=3;j < charaStar[i];j++){ if(j === 5){break;} %>★<% } if(charaStar[i] === 6){%><font color=”#f00″>★</font><%}%>
+                                                                        </div>
+                                                                </li><% 
+                                                                } %>
+                                                            </ul>
+                                                        </div>
+                                                        <% 
+                                                        if(item.carryover > 0){ %>
+                                                            <div class="table-chara-carryover">持越<%= item.carryover %>s</div><% 
+                                                        } %><% 
+                                                        if(item.URL !== ""){ %>
+                                                            <div class="table-chara-url"><a href="<%= item.URL %>" target="_blank">参考リンク</a></div><% 
+                                                        } %>
+                                                    </div>
+                                                </div>
+                                                <div class="item-menu">
+                                                    <a href="/edit/<%= item.id %>">編集</a>
+                                                </div>
+                                            </li>
+                                            <!--ここまで編成表示画面--><%
+                        }%></div>   
+                    <%
+                    if(formation_number>100){break;}
+                }%>
+                <%}}%>
+
+
+
+<!--検索id=3 3凸編成検索-->
+                <%
+                if(Number(search_type) === 3){
+                    let formation_number = 0;
+                    for(let i = 0;i < items.length-2;i++){
+                        <!-- check1-1 -->
+                        if(search_chara_list[items[i].chara1_id]+search_chara_list[items[i].chara2_id]+search_chara_list[items[i].chara3_id]
+                        +search_chara_list[items[i].chara4_id]+search_chara_list[items[i].chara5_id]<=3){continue;}
+
+                        for(let j = i+1 ;j < items.length-1;j++){
+                            <!-- check1-2 -->
+                            if(search_chara_list[items[j].chara1_id]+search_chara_list[items[j].chara2_id]+search_chara_list[items[j].chara3_id]
+                            +search_chara_list[items[j].chara4_id]+search_chara_list[items[j].chara5_id]<=3){continue;}
+
+                            for(let k = j+1;k < items.length;k++){
+                                <!-- check1-3 -->
+                                if(search_chara_list[items[k].chara1_id]+search_chara_list[items[k].chara2_id]+search_chara_list[items[k].chara3_id]
+                                +search_chara_list[items[k].chara4_id]+search_chara_list[items[k].chara5_id]<=3){continue;}
+                                
+                                <!-- check2 -->
+                                let check2 = search_chara_list.concat();
+                                check2[items[i].chara1_id]--;check2[items[i].chara2_id]--;check2[items[i].chara3_id]--;check2[items[i].chara4_id]--;check2[items[i].chara5_id]--;
+                                check2[items[j].chara1_id]--;check2[items[j].chara2_id]--;check2[items[j].chara3_id]--;check2[items[j].chara4_id]--;check2[items[j].chara5_id]--;
+                                check2[items[k].chara1_id]--;check2[items[k].chara2_id]--;check2[items[k].chara3_id]--;check2[items[k].chara4_id]--;check2[items[k].chara5_id]--;
+                                let check2_counter = 0;
+                                for(let k =0;k < check2.length;k++){
+                                    if(check2[k]<0){
+                                        check2_counter -=check2[k];
+                                    }
+                                }
+                                if(check2_counter >3){continue;}
+
+                                <!-- check3 -->
+                                let check3_counter = [0,0,0];
+                                check3_counter[0] = check2[items[i].chara1_id] + check2[items[i].chara2_id] + check2[items[i].chara3_id] + check2[items[i].chara4_id] + check2[items[i].chara5_id];
+                                check3_counter[1] = check2[items[j].chara1_id] + check2[items[j].chara2_id] + check2[items[j].chara3_id] + check2[items[j].chara4_id] + check2[items[j].chara5_id];
+                                check3_counter[2] = check2[items[k].chara1_id] + check2[items[k].chara2_id] + check2[items[k].chara3_id] + check2[items[k].chara4_id] + check2[items[k].chara5_id]; 
+                                if(check3_counter[0] ===-3 || check3_counter[1] === -3 || check3_counter[2] === -3){continue;}
+
+                                formation_number++;
+                                let id2_items = [items[i],items[j],items[k]];
+                                %><div class="attack3">
+                                    <div class="attack2-text">
+                                        <span>3凸編成(<%=id2_items[0].boss%>-<%=id2_items[1].boss%>-<%=id2_items[2].boss%>)</span>
+                                        <span>サポート使用回数:<%=check2_counter%></span>
+                                        <span style="float: right">総ダメージ:
+                                            <%const allDamage=id2_items[0].damage + id2_items[1].damage +id2_items[2].damage;%>
+                                            <%= allDamage.toLocaleString()%>(平均:<%=(Math.round(allDamage/3)).toLocaleString()%>)</span>
+                                    </div>
+                                    <%
+                                for(let n = 0;n < 3; n++){
+                                    let item = id2_items[n];%>
+                                            <!--ここから編成表示画面，itemの編成を表示する-->
+                                            <li>
+                                                <div class="item-data">
+                                                    <img class="table-boss-image" src='../images/boss/<%= item.date %>_<%= item.boss %>.png'>
+                                                    <div class="table-boss-difficulty"><%= item.difficulty %>段階目</div>
+                                                    <p class="table-boss"><%= item.boss %>ボス</p>
+                                                    <div class="table-right">
+                                                        <div class="table-damage"> 
+                                                            <span class="table-damage-left">与えたダメージ</span> 
+                                                            <span class="table-damage-auto" <% 
+                                                            if(item.auto === 0){ %> style="background-color:gray; opacity:0.5">フルオート<% 
+                                                            }else if(item.auto === 1){ %> style="background-color:#82c588; opacity:0.7">セミオート<% 
+                                                            }else{%> style="background-color:red">手動<% 
+                                                            }; %></span>
+                                                            
+                                                            <span class="table-damage-right"><%= item.damage.toLocaleString()  %><br></span>
+                                                        </div>
+                        
+                                                        <%  const charaId = [item.chara1_id,item.chara2_id,item.chara3_id,item.chara4_id,item.chara5_id];
+                                                            const charaRank=[item.chara1_rank,item.chara2_rank,item.chara3_rank,item.chara4_rank,item.chara5_rank];
+                                                            const charaStar=[item.chara1_star,item.chara2_star,item.chara3_star,item.chara4_star,item.chara5_star]; %>
+                                                        <div class="table-chara-list">
+                                                            <ul>
+                                                                <% 
+                                                                for(let i = 0;i < 5;i++){ %>
+                                                                    <li class="chara-column" title="<%=chara_unsort[charaId[i]-1].name%>(<%= chara_limitedName[chara_unsort[charaId[i]-1].limitedType]%>)">
+                                                                        <img src='../images/chara/<%= charaId[i] %>.png' width="50" height="50"> 
+                                                                    <% 
+                                                                    if( charaRank[i] > 17 ){ %> 
+                                                                        <div class="table-chara-frame" style="border:3px solid rgb(238, 99, 99);"></div>
+                                                                        <div class="table-chara-rank" style="color:#ce313b"><% 
+                                                                    }else{ %>
+                                                                        <div class="table-chara-frame" style="border:3px solid #d596fa;"></div>
+                                                                        <div class="table-chara-rank" style="color:#9c45ce"><% 
+                                                                    } %>
+                                                                    R<%= charaRank[i] %></div>
+                                                                    <div class="table-chara-star"><span>★★★</span>
+                                                                        <% for(let j=3;j < charaStar[i];j++){ if(j === 5){break;} %>★<% } if(charaStar[i] === 6){%><font color=”#f00″>★</font><%}%>
+                                                                        </div>
+                                                                </li><% 
+                                                                } %>
+                                                            </ul>
+                                                        </div>
+                                                        <% 
+                                                        if(item.carryover > 0){ %>
+                                                            <div class="table-chara-carryover">持越<%= item.carryover %>s</div><% 
+                                                        } %><% 
+                                                        if(item.URL !== ""){ %>
+                                                            <div class="table-chara-url"><a href="<%= item.URL %>" target="_blank">参考リンク</a></div><% 
+                                                        } %>
+                                                    </div>
+                                                </div>
+                                                <div class="item-menu">
+                                                    <a href="/edit/<%= item.id %>">編集</a>
+                                                </div>
+                                            </li>
+                                            <!--ここまで編成表示画面--><%
+                                }%></div><%  
+                            }%><%            
+                        }
+                        if(formation_number>100){break;}
+                    }
+                }%>    
+
+            </ul>
+        </div>
+    </div>
+</body>
+
+</html>

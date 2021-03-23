@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>クランバトル編成DB</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/send_url.js"></script>
+  </head>
+  <body>
+    <header>
+      <a href="/" class="header-logo">クランバトル編成DB</a>
+    </header>
+    
+    <div class="container">
+      <div class="container-header">
+        <h1>編成新規登録</h1><br>
+      </div>
+        
+
+    <br>
+      想定ダメージが1700万のとき「17000000」と記入．<br>
+      持越がないとき（倒せないとき）は持越秒数は「0」と記入（デフォルト値は0）．<br>
+
+      <div class="new-table-wrapper">
+        <span class="form-box-head">ボス情報</span>
+        <span class="form-box-head">編成情報</span>
+      </div>
+      <% 
+            let contain_chara = Array(chara.length+1);
+            contain_chara.fill(0);
+            for(let i = 0;i < allItems.length;i++){
+                contain_chara[allItems[i].chara1_id]=1;
+                contain_chara[allItems[i].chara2_id]=1;
+                contain_chara[allItems[i].chara3_id]=1;
+                contain_chara[allItems[i].chara4_id]=1;
+                contain_chara[allItems[i].chara5_id]=1;
+            }
+            
+            let chara_limitedName = Array(chara_limitedType.length);
+            chara_limitedName[0]="通常";
+            for(let i = 1; i <=chara_limitedType.length;i++){
+              chara_limitedName[i]=chara_limitedType[i-1].limitedType;};%> 
+      <div class="item-form-wrapper">
+        <% if(!prereq.charaId){%>
+          編成に使う5キャラ選択してください
+          <%}else{
+            if(prereq.charaId.length !== 5){%>
+              5キャラ選択してください（キャラ選択数：<%= prereq.charaId.length %>）
+            <%}else{ %>
+              <!--キャラを配置順でソートするための二重配列-->
+              <% let position_chara = [[0,prereq.charaId[0]],[0,prereq.charaId[1]],[0,prereq.charaId[2]],[0,prereq.charaId[3]],[0,prereq.charaId[4]]];
+              for(let i = 0;i < 5;i++){
+                for(let j = 0;j < chara.length;j++){
+                  if(Number(position_chara[i][1]) === Number(chara[j].id)){
+                    position_chara[i][0] = chara[j].positionNumber;   continue;
+                  }
+                }
+              }
+              position_chara.sort(function(a, b) {
+                if(a[0]<b[0]){return -1;}
+                if(a[0]>b[0]){return 1;}
+                return 0;
+              });
+              position_chara.reverse();
+              console.log(position_chara);
+              %>
+        <form action="/create" method="post">
+          <ul>
+            <li class="form-box">
+              <select name="itemDate">
+                <option value="202102"> 2021/02 </option>
+                <option value="202103"> 2021/03 </option>
+              </select><br>
+              <select name="itemDifficulty">
+                <option value="1"> 1段階目 </option>
+                <option value="2"> 2段階目 </option>
+                <option value="3"> 3段階目 </option>
+                <option value="4" selected> 4,5段階目 </option>
+              </select><br>
+              <p>
+              <select name="itemBoss_id">
+                <option value="1"> 1ボス </option>
+                <option value="2"> 2ボス </option>
+                <option value="3"> 3ボス </option>
+                <option value="4"> 4ボス </option>
+                <option value="5"> 5ボス </option>
+              </select><br>
+              </p>
+              <span class="damage-input"><input type="text" name="itemDamage" placeholder="想定ダメージ"></span><br>
+              持越秒数<span class="damage-input"><input type="text" name="itemCarryover" value="0" style="width:30px;"></span>
+              <select name="itemAuto">
+                <option value="0">フルオート</option>
+                <option value="1">セミオート</option>
+                <option value="2">手動</option>
+              </select>
+              <input type="text" name="itemURL" placeholder="参考URL">
+            </li>
+
+            <% for(let i=1;i<=5;i++){ %>
+            <li  class="form-box-chara">
+              <input class="form-box-chara-id" type="text" name="itemChara<%=i%>_id" style="width:30px;" value="<%=position_chara[i-1][1]%>">
+              <span><%= chara[position_chara[i-1][1]-1].name %></span><br>
+              <span><font size="2">(<%= chara_limitedName[chara[position_chara[i-1][1]-1].limitedType] %>)</font></span><br>
+
+              <img src='../images/chara/<%=position_chara[i-1][1]%>.png' width="50" height="50">
+              <select name="itemChara<%=i%>_rank">
+                <option value="20">R20</option>
+                <option value="19">R19</option>
+                <option value="18">R18</option>
+                <option value="17">R17</option>
+                <option value="16">R16</option>
+                <option value="15">R15</option>
+                <option value="14">R14</option>
+                <option value="13">R13</option>
+                <option value="12">R12</option>
+                <option value="11">R11</option>
+              </select><br>
+              <select name="itemChara<%=i%>_star">
+                <option value="3">★★★</option>
+                <option value="4">★★★★</option>
+                <option value="5">★★★★★</option>
+                <option value="6">★★★★★★</option>
+              </select><br>
+            </li>
+              <% } %>
+          </ul>
+            
+          <input type="submit" value="作成する">
+        </form>
+      </div>
+      
+      <a href="/index" class="cancel-button"></span>もどる</a>
+      <% }} %>
+      <form action="/new" method="post">
+        
+        <div class="new-chara-select">
+          既存編成に使用されているキャラクター
+          <ul>
+            <% for(let i = 1;i <= chara.length;i++){
+              let id= chara[i-1].id;
+              if(contain_chara[id] ===1){%>
+            <li>
+                <label class="check-box" for="check<%=id%>"  title="<%=chara[i-1].name%>(<%= chara_limitedName[chara[i-1].limitedType]%>)">
+                    <input type="checkbox" name="charaId" value="<%=id%>" id="check<%=id%>" 
+                    <% if(!prereq.charaId){ %>  <%}else{
+                        for(j =0;j<prereq.charaId.length;j++){
+                            if(Number(prereq.charaId[j]) === id){%> checked <%break;}}
+                    }
+                    %> >
+
+                    <span class="text"></span>
+                    <img src='../images/chara/<%=id%>.png' width="50" height="50">
+                </label>
+            </li>
+            <% }} %>
+            <input type="submit" value="キャラを選択する">
+            </ul>
+        </div>
+        <br>
+        <div class="new-chara-select">
+          既存編成に使用されていないキャラクター
+            <ul>
+              <% for(let i = 1;i <= chara.length;i++){
+                let id= chara[i-1].id;
+                if(contain_chara[id] ===0){%>
+              <li>
+                  <label class="check-box" for="check<%=id%>"  title="<%=chara[i-1].name%>(<%= chara_limitedName[chara[i-1].limitedType]%>)">
+                      <input type="checkbox" name="charaId" value="<%=id%>" id="check<%=id%>" 
+                      <% if(!prereq.charaId){ %>  <%}else{
+                          for(j =0;j<prereq.charaId.length;j++){
+                              if(Number(prereq.charaId[j]) === id){%> checked <%break;}}
+                      }
+                      %> >
+  
+                      <span class="text"></span>
+                      <img src='../images/chara/<%=id%>.png' width="50" height="50">
+                  </label>
+              </li>
+              <% }} %>
+
+            </ul>
+          <input type="submit" value="キャラを選択する">
+        </div>
+      </form>
+    </div>
+  </body>
+</html>

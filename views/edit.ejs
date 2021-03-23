@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>クランバトル編成DB</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/send_url.js"></script>
+  </head>
+  <body>
+    <header>
+      <a href="/" class="header-logo">クランバトル編成DB</a>
+    </header>
+    <div class="container">
+      <div class="container-header">
+        <h1>準備中:削除のみ出来ます．</h1>
+      </div>
+      <div class="item-form-wrapper">
+        <!--
+        <p class="form-label">買うもの</p>
+        <form action="/update/<%= item.id %>" method="post">
+          <input type="text" name="itemName" value="<%= item.name %>">
+          <input type="submit" value="更新する">
+        </form>
+      -->
+        <div class="index-table-wrapper">
+            <ul class="table-body">
+                  <div class="table-dateHeader"><% if(item.date === 202102){ %> 02/23 05:00~02/27 23:59 <% } %>   
+                    <span style="float:right;"><%= (item.date - item.date % 100) / 100 %>年<%= item.date % 100 %>月クランバトル</span> </div>
+                    <li>
+                        <div class="item-data">
+                            <img class="table-boss-image" src='../images/boss/<%= item.date %>_<%= item.difficulty %>_<%= item.boss %>.jpg'>
+                            <p class="table-boss"><%= item.boss %>ボス</p>
+                            <div class="table-right">
+                                <div class="table-damage"> 
+                                    <span class="table-damage-left">与えたダメージ</span> 
+                                    <span class="table-damage-auto" <% if(item.auto === 0){ %> style="background-color:brown">フルオート
+                                        <% }else if(item.auto === 1){ %> style="background-color:blue">セミオート
+                                        <% }else{%> style="background-color:red">手動<% }; %></span>
+                                    
+                                    <span class="table-damage-right"><%= (item.damage /10000)*10000  %><br></span>
+                                </div>
+
+                                <%  const charaId = [item.chara1_id,item.chara2_id,item.chara3_id,item.chara4_id,item.chara5_id];
+                                    const charaRank=[item.chara1_rank,item.chara2_rank,item.chara3_rank,item.chara4_rank,item.chara5_rank];
+                                    const charaStar=[item.chara1_star,item.chara2_star,item.chara3_star,item.chara4_star,item.chara5_star]; %>
+                                <div class="table-chara-list">
+                                    <ul>
+                                        <% for(let i = 0;i < 5;i++){ %>
+                                        <li class="chara-column">
+                                            <img src='../images/chara/<%= charaId[i] %>.png' width="50" height="50"> 
+                                            
+                                            <% if( charaRank[i] > 17 ){ %> 
+                                                <div class="table-chara-frame" style="border:3px solid rgb(209, 47, 47);"></div>
+                                                <div class="table-chara-rank" style="color:#F7626B">
+                                            <% }else{ %>
+                                                <div class="table-chara-frame" style="border:3px solid #C97FF4;"></div>
+                                                <div class="table-chara-rank" style="color:#C97FF4">
+                                            <% } %>
+                                            R<%= charaRank[i] %></div>
+                                            <div class="table-chara-star">
+                                                <% for(let j=0;j < charaStar[i];j++){ if(j === 5){break;} %>★<% } if(charaStar[i] === 6){%><font color=”#f00″>★</font><%}%>
+                                                </div>
+                                        </li>
+                                        <% } %>
+                                    </ul>
+                                </div>
+                                <% if(item.carryover > 0){ %>
+                                <div class="table-chara-carryover">持越<%= item.carryover %>s</div>
+                                <% } %>
+                                <% if(item.URL !== ""){ %>
+                                <div class="table-chara-url"><a href="<%= item.URL %>" target="_blank">参考リンク</a></div>
+                                <% } %>
+                            </div>
+                        </div>
+                    </li>
+            </ul>
+        </div>
+    
+        <form action="/delete/<%= item.id %>" method="post">
+          <input type="submit" value="削除">
+      </form>
+      </div>
+      <a href="/index" class="cancel-button">もどる</a>
+    </div>
+  </body>
+</html>
