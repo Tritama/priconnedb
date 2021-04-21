@@ -1,7 +1,7 @@
 const express = require('express');
 const mysql = require('mysql');
-
 const app = express();
+app.use(express.static('public'));
 
 const connection = mysql.createConnection({
   host: 'us-cdbr-east-03.cleardb.com',
@@ -18,7 +18,7 @@ connection.connect((err) => {
     }
     console.log('success');
   });
-  app.listen(3001);
+  app.listen(process.env.PORT || 5000);
 
 //ここからprogate参考
  
