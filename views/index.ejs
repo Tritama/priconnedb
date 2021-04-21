@@ -19,7 +19,7 @@
                 <li class="form-box">
                     <select name="itemDate">
                         <option value="202102"> 2021/02 </option>
-                        <option value="202103"> 2021/03 </option>
+                        <option value="202103" selected> 2021/03 </option>
                     </select><br>
                     
                     <select name="itemDifficulty">
@@ -105,7 +105,7 @@
                             if(items[0].date === 202102){
                                 %> 02/23 05:00~02/27 23:59 <% 
                             } if(items[0].date === 202103){
-                                %> 03/26 05:00=03/30 23:59 <%}%>
+                                %> 03/26 05:00~03/30 23:59 <%}%>
 
                         <span style="float:right;"><%= (items[0].date - items[0].date % 100) / 100 %>年<%= items[0].date % 100 %>月クランバトル</span> </div> <% 
                     }

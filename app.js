@@ -4,10 +4,10 @@ const mysql = require('mysql');
 const app = express();
 
 const connection = mysql.createConnection({
-  host: 'localhost',
-  user: 'root', 
-  password: '122333',
-  database: 'list_app',
+  host: 'us-cdbr-east-03.cleardb.com',
+  user: 'b640f33290753b', 
+  password: 'e406d373',
+  database: 'heroku_29e5036dc33ecaa',
   multipleStatements: true
 });
  
