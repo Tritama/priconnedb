@@ -5,9 +5,9 @@ const app = express();
 
 const connection = mysql.createConnection({
   host: 'us-cdbr-east-03.cleardb.com',
-  user: 'b640f33290753b', 
-  password: 'e406d373',
-  database: 'heroku_29e5036dc33ecaa',
+  user: 'be1bfc3975eda3', 
+  password: '523a4950',
+  database: 'heroku_35a6ec7e5af8e2d',
   multipleStatements: true
 });
  
