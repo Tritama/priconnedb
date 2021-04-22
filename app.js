@@ -3,7 +3,7 @@ const mysql = require('mysql');
 const app = express();
 
 
-const connection = mysql.createConnection({
+const connection = mysql.createPool({
   host: 'us-cdbr-east-03.cleardb.com',
   user: 'be1bfc3975eda3', 
   password: '523a4950',
@@ -24,15 +24,15 @@ connection.connect((err) => {
  
 
 
-//app.use(express.static('public'));
-//app.use(express.urlencoded({extended: false}));
+app.use(express.static('public'));
+app.use(express.urlencoded({extended: false}));
 
 
 app.get('/', (req, res) => {
   res.render('top.ejs');
 });
 
-/*
+
 app.get('/index', (req, res) => {
   connection.query(
     'SELECT * FROM items ;SELECT * FROM chara ORDER BY position ASC; SELECT * from items; SELECT * FROM chara_limitedType;SELECT * FROM chara',
@@ -120,4 +120,3 @@ app.post("/search/:id", (req, res) => {
     }
   );
 });
-*/
