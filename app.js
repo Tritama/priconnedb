@@ -31,6 +31,7 @@ app.get('/', (req, res) => {
   res.render('top.ejs');
 });
 
+/*
 app.get('/index', (req, res) => {
   connection.query(
     'SELECT * FROM items ;SELECT * FROM chara ORDER BY position ASC; SELECT * from items; SELECT * FROM chara_limitedType;SELECT * FROM chara',
@@ -118,3 +119,4 @@ app.post("/search/:id", (req, res) => {
     }
   );
 });
+*/
