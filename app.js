@@ -10,6 +10,7 @@ const connection = mysql.createPool({
   database: 'heroku_35a6ec7e5af8e2d',
   multipleStatements: true
 });
+app.listen(process.env.PORT || 5005);
 
 connection.connect((err) => {
     if (err) {
@@ -18,7 +19,6 @@ connection.connect((err) => {
     }
     console.log('success');
   });
-  app.listen(process.env.PORT || 5005);
 
 //ここからprogate参考
  
