@@ -1,7 +1,7 @@
 const express = require('express');
-//const mysql = require('mysql');
+const mysql = require('mysql');
 const app = express();
-/*
+
 const connection = mysql.createConnection({
   host: 'us-cdbr-east-03.cleardb.com',
   user: 'be1bfc3975eda3', 
@@ -9,7 +9,7 @@ const connection = mysql.createConnection({
   database: 'heroku_35a6ec7e5af8e2d',
   multipleStatements: true
 });
- */
+
 connection.connect((err) => {
     if (err) {
       console.log('error connecting: ' + err.stack);
@@ -23,8 +23,8 @@ connection.connect((err) => {
  
 
 
-app.use(express.static('public'));
-app.use(express.urlencoded({extended: false}));
+//app.use(express.static('public'));
+//app.use(express.urlencoded({extended: false}));
 
 
 app.get('/', (req, res) => {
