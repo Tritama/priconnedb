@@ -2,7 +2,8 @@ const express = require('express');
 const mysql = require('mysql');
 const app = express();
 
-
+const cacheControl = require('express-cache-controller');
+app.use(cacheControl({ maxAge: 0 }));
 
 var db_config =  {
   host: 'us-cdbr-east-03.cleardb.com',
