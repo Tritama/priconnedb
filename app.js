@@ -56,7 +56,7 @@ app.listen(process.env.PORT || 5000);
  
 
 
-app.use(express.static('public',{maxAge:0}));
+app.use(express.static('public',{maxAge:5000}));
 app.use(express.urlencoded({extended: false}));
 
 
