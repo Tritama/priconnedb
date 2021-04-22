@@ -1,7 +1,8 @@
 const express = require('express');
 const mysql = require('mysql');
 const app = express();
-app.disable('etag'); //追加
+
+
 var db_config =  {
   host: 'us-cdbr-east-03.cleardb.com',
   user: 'be1bfc3975eda3', 
@@ -55,7 +56,7 @@ app.listen(process.env.PORT || 5000);
  
 
 
-app.use(express.static('public'));
+app.use(express.static('public',{maxAge:0}));
 app.use(express.urlencoded({extended: false}));
 
 
