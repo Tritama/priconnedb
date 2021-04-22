@@ -3,15 +3,46 @@ const mysql = require('mysql');
 const app = express();
 
 
-const connection = mysql.createPool({
+
+var db_config =  {
   host: 'us-cdbr-east-03.cleardb.com',
   user: 'be1bfc3975eda3', 
   password: '523a4950',
   database: 'heroku_35a6ec7e5af8e2d',
   multipleStatements: true
-});
-app.listen(process.env.PORT || 5005);
+};
 
+var connection;
+
+function handleDisconnect() {
+    console.log('INFO.CONNECTION_DB: ');
+    connection = mysql.createConnection(db_config);
+    console.log('createConnection :')
+    //connection取得
+    connection.connect((err) => {
+      if (err) {
+        console.log('error connecting: ' + err.stack);
+        return;
+      }
+      console.log('success');
+    });
+    
+    //error('PROTOCOL_CONNECTION_LOST')時に再接続
+    connection.on('error', function(err) {
+        console.log('ERROR.DB: ', err);
+        if (err.code === 'PROTOCOL_CONNECTION_LOST') {
+            console.log('ERROR.CONNECTION_LOST: ', err);
+            handleDisconnect();
+        } else {
+            throw err;
+        }
+    });
+}
+
+handleDisconnect();
+
+/*
+const connection = mysql.createConnection(db_config);
 connection.connect((err) => {
     if (err) {
       console.log('error connecting: ' + err.stack);
@@ -19,6 +50,8 @@ connection.connect((err) => {
     }
     console.log('success');
   });
+*/
+app.listen(process.env.PORT || 5000);
 
 //ここからprogate参考
  
