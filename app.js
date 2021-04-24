@@ -2,7 +2,9 @@ const express = require('express');
 const mysql = require('mysql');
 const app = express();
 
-var config = require('./config');
+//本番環境用とローカル用でPWを用意する
+var config = process.env;
+
 var db_config =  {
   host: config.host,
   user: config.user, 
