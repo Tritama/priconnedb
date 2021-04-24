@@ -2,12 +2,12 @@ const express = require('express');
 const mysql = require('mysql');
 const app = express();
 
-
+var config = require('./config');
 var db_config =  {
-  host: 'us-cdbr-east-03.cleardb.com',
-  user: '', 
-  password: '',
-  database: '',
+  host: config.host,
+  user: config.user, 
+  password: config.password,
+  database: config.database,
   multipleStatements: true
 };
 
