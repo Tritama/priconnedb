@@ -2,12 +2,11 @@ const express = require('express');
 const mysql = require('mysql');
 const app = express();
 
-//本番環境用とローカル用でPWを用意する
 var db_config =  {
-  host: process.env.host,
-  user: process.env.user, 
-  password: process.env.password,
-  database: process.env.database,
+  host: process.env.DB_USER,
+  user: process.env.DB_PASS, 
+  password: process.env.DB_DATABASE,
+  database: process.env.DB_HOST,
   multipleStatements: true
 };
 
