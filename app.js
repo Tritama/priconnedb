@@ -3,10 +3,10 @@ const mysql = require('mysql');
 const app = express();
 
 var db_config =  {
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER, 
-  password: process.env.DB_PASS,
-  database: process.env.DB_DATABASE,
+  host: process.env.DB_host,
+  user: process.env.DB_user, 
+  password: process.env.DB_password,
+  database: process.env.DB_database,
   multipleStatements: true
 };
 
