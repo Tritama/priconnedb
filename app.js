@@ -14,7 +14,7 @@ var db_config =  {
   database: config.DB_database,
   multipleStatements: true
 };
-
+console.log(db_config);
 var connection;
 
 function handleDisconnect() {
