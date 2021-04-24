@@ -5,9 +5,9 @@ const app = express();
 
 var db_config =  {
   host: 'us-cdbr-east-03.cleardb.com',
-  user: 'be1bfc3975eda3', 
-  password: '523a4950',
-  database: 'heroku_35a6ec7e5af8e2d',
+  user: '', 
+  password: '',
+  database: '',
   multipleStatements: true
 };
 
