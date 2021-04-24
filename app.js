@@ -4,7 +4,7 @@ const app = express();
 
 //本番環境用とローカル用でPWを用意する
 var config = process.env;
-
+console.log(config);
 var db_config =  {
   host: config.host,
   user: config.user, 
