@@ -3,8 +3,8 @@ const mysql = require('mysql');
 const app = express();
 
 //本番環境用とローカル用でPWを用意する
-const config = require('./config.js');//ローカル用
-//const config = process.env;//本番用
+//const config = require('./config.js');//ローカル用
+const config = process.env;//本番用
 
 var db_config =  {
   host: config.DB_host,
