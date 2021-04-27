@@ -398,7 +398,7 @@
                                 check3_counter[0] = check2[items[i].chara1_id] + check2[items[i].chara2_id] + check2[items[i].chara3_id] + check2[items[i].chara4_id] + check2[items[i].chara5_id];
                                 check3_counter[1] = check2[items[j].chara1_id] + check2[items[j].chara2_id] + check2[items[j].chara3_id] + check2[items[j].chara4_id] + check2[items[j].chara5_id];
                                 check3_counter[2] = check2[items[k].chara1_id] + check2[items[k].chara2_id] + check2[items[k].chara3_id] + check2[items[k].chara4_id] + check2[items[k].chara5_id]; 
-                                if(check3_counter[0] ===-3 || check3_counter[1] === -3 || check3_counter[2] === -3){continue;}
+                                if((check3_counter[0] ===-3 && check3_counter[1] === -3) || (check3_counter[1] === -3 && check3_counter[2] === -3) || (check3_counter[2] === -3 && check3_counter[0] === -3)){continue;}
 
                                 formation_number++;
                                 let id2_items = [items[i],items[j],items[k]];
